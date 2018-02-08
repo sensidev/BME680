@@ -5,7 +5,7 @@
 #include "mbed.h"
 
 #define BME680_DEFAULT_ADDRESS (0x77 << 1)  // The default I2C address (shifted for MBed 8 bit address)
-#define BME680_DEBUG_MODE  // Use this for enhance debug logs for I2C and more.
+//#define BME680_DEBUG_MODE  // Use this for enhance debug logs for I2C and more.
 
 extern I2C i2c;
 
