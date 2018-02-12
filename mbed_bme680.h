@@ -16,17 +16,10 @@ extern I2C i2c;
 class BME680 {
 public:
     BME680();
+
     BME680(uint8_t adr);
 
     bool begin();
-
-    float readTemperature(void);
-
-    float readPressure(void);
-
-    float readHumidity(void);
-
-    float readGas(void);
 
     bool setTemperatureOversampling(uint8_t os);
 
@@ -38,29 +31,26 @@ public:
 
     bool setGasHeater(uint16_t heaterTemp, uint16_t heaterTime);
 
-    bool performReading(void);
+    bool performReading();
 
-    /**
-     * Temperature (Celsius) assigned after calling performReading()
-     */
-    float temperature;
-    /**
-     * Pressure (Pascals) assigned after calling performReading()
-     */
-    float pressure;
-    /**
-     * Humidity (RH %) assigned after calling performReading()
-     */
-    float humidity;
-    /**
-     * Gas resistor (ohms) assigned after calling performReading()
-     */
-    float gas_resistance;
+    int16_t getRawTemperature();
+    uint32_t getRawPressure();
+    uint32_t getRawHumidity();
+    uint32_t getRawGasResistance();
+
+    float getTemperature();
+
+    float getPressure();
+
+    float getHumidity();
+
+    float getGasResistance();
 
 private:
     bool _filterEnabled, _tempEnabled, _humEnabled, _presEnabled, _gasEnabled;
     int32_t _sensorID;
     struct bme680_dev gas_sensor;
+    struct bme680_field_data data;
     uint8_t _adr;
 
     static void log(const char *format, ...);

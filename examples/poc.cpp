@@ -21,10 +21,10 @@ int main() {
         pc.printf("-------------------- \r\n");
 
         if (bme680.performReading()) {
-            pc.printf("BME680 Temperature: %.2f degC \r\n", bme680.temperature);
-            pc.printf("BME680 Humidity: %.2f %% \r\n", bme680.humidity);
-            pc.printf("BME680 Pressure: %.2f hPa \r\n", bme680.pressure / 100.0);
-            pc.printf("BME680 VOC: %0.2f KOhms \r\n", bme680.gas_resistance / 1000.0);
+            pc.printf("BME680 Temperature: %.2f degC \r\n", bme680.getTemperature());
+            pc.printf("BME680 Humidity: %.2f %% \r\n", bme680.getHumidity());
+            pc.printf("BME680 Pressure: %.2f hPa \r\n", bme680.getPressure() / 100.0);
+            pc.printf("BME680 VOC: %0.2f KOhms \r\n", bme680.getGasResistance() / 1000.0);
         }
 
         wait(2);

@@ -22,33 +22,13 @@ bool BME680::begin() {
     if (result != BME680_OK)
         return false;
 
-    setTemperatureOversampling(BME680_OS_8X);
     setHumidityOversampling(BME680_OS_2X);
     setPressureOversampling(BME680_OS_4X);
+    setTemperatureOversampling(BME680_OS_8X);
     setIIRFilterSize(BME680_FILTER_SIZE_3);
     setGasHeater(320, 150); // 320*C for 150 ms
 
     return true;
-}
-
-float BME680::readTemperature(void) {
-    performReading();
-    return temperature;
-}
-
-float BME680::readPressure(void) {
-    performReading();
-    return pressure;
-}
-
-float BME680::readHumidity(void) {
-    performReading();
-    return humidity;
-}
-
-float BME680::readGas(void) {
-    performReading();
-    return gas_resistance;
 }
 
 /**
@@ -58,7 +38,6 @@ float BME680::readGas(void) {
  */
 bool BME680::performReading(void) {
     uint8_t set_required_settings = 0;
-    struct bme680_field_data data;
     int8_t result;
 
     /* Select the power mode */
@@ -102,39 +81,91 @@ bool BME680::performReading(void) {
     if (result != BME680_OK)
         return false;
 
+    return true;
+}
+
+
+int16_t BME680::getRawTemperature() {
+    return data.temperature;
+}
+
+uint32_t BME680::getRawPressure() {
+    return data.pressure;
+}
+
+uint32_t BME680::getRawHumidity() {
+    return data.humidity;
+}
+
+uint32_t BME680::getRawGasResistance() {
+    return data.gas_resistance;
+}
+
+/**
+ * Get last read temperature
+ * @return Temperature in degree celsius
+ */
+float BME680::getTemperature() {
+    float temperature = NAN;
+
     if (_tempEnabled) {
         temperature = data.temperature / 100.0;
-        log("Temperature Data %d \r\n", data.temperature);
-    } else {
-        temperature = NAN;
+        log("Temperature Raw Data %d \r\n", temperature);
     }
+
+    return temperature;
+}
+
+/**
+ * Get last read humidity
+ * @return Humidity in % relative humidity
+ */
+float BME680::getHumidity() {
+    float humidity = NAN;
 
     if (_humEnabled) {
         humidity = data.humidity / 1000.0;
-        log("Humidity Data %d \r\n", data.humidity);
-    } else {
-        humidity = NAN;
+        log("Humidity Raw Data %d \r\n", humidity);
     }
+
+    return humidity;
+
+}
+
+
+/**
+ * Get last read pressure
+ * @return Pressure in Pascal
+ */
+float BME680::getPressure() {
+    float pressure = NAN;
 
     if (_presEnabled) {
         pressure = data.pressure;
-        log("Pressure Data %d \r\n", data.pressure);
-    } else {
-        pressure = NAN;
+        log("Pressure Raw Data %d \r\n", pressure);
     }
+
+    return pressure;
+}
+
+/**
+ * Get last read gas resistance
+ * @return Gas resistance in Ohms
+ */
+float BME680::getGasResistance() {
+    float gas_resistance = 0;
 
     /* Avoid using measurements from an unstable heating setup */
     if (_gasEnabled) {
         if (data.status & BME680_HEAT_STAB_MSK) {
             gas_resistance = data.gas_resistance;
-            log("Gas Resistance Data %d \r\n", data.gas_resistance);
+            log("Gas Resistance Raw Data %d \r\n", gas_resistance);
         } else {
-            gas_resistance = 0;
             log("Gas reading unstable \r\n");
         }
     }
 
-    return true;
+    return gas_resistance;
 }
 
 /**
