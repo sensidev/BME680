@@ -33,6 +33,8 @@ public:
 
     bool performReading();
 
+    bool isGasHeatingSetupStable();
+
     int16_t getRawTemperature();
     uint32_t getRawPressure();
     uint32_t getRawHumidity();

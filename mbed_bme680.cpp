@@ -10,23 +10,24 @@ BME680::BME680(uint8_t adr) {
 }
 
 bool BME680::begin() {
+    int8_t result;
+
     gas_sensor.dev_id = _adr;
     gas_sensor.intf = BME680_I2C_INTF;
     gas_sensor.read = &BME680::i2c_read;
     gas_sensor.write = &BME680::i2c_write;
     gas_sensor.delay_ms = BME680::delay_msec;
 
-    int8_t result = BME680_OK;
-    result = bme680_init(&gas_sensor);
-
-    if (result != BME680_OK)
-        return false;
-
     setHumidityOversampling(BME680_OS_2X);
     setPressureOversampling(BME680_OS_4X);
     setTemperatureOversampling(BME680_OS_8X);
     setIIRFilterSize(BME680_FILTER_SIZE_3);
     setGasHeater(320, 150); // 320*C for 150 ms
+
+    result = bme680_init(&gas_sensor);
+
+    if (result != BME680_OK)
+        return false;
 
     return true;
 }
@@ -74,7 +75,7 @@ bool BME680::performReading(void) {
     bme680_get_profile_dur(&meas_period, &gas_sensor);
 
     /* Delay till the measurement is ready */
-    delay_msec(meas_period * 2);
+    delay_msec(meas_period);
 
     result = bme680_get_sensor_data(&data, &gas_sensor);
     log("Get sensor data, result %d \r\n", result);
@@ -84,6 +85,13 @@ bool BME680::performReading(void) {
     return true;
 }
 
+bool BME680::isGasHeatingSetupStable() {
+    if (data.status & BME680_HEAT_STAB_MSK) {
+        return true;
+    }
+
+    return false;
+}
 
 int16_t BME680::getRawTemperature() {
     return data.temperature;
@@ -155,9 +163,8 @@ float BME680::getPressure() {
 float BME680::getGasResistance() {
     float gas_resistance = 0;
 
-    /* Avoid using measurements from an unstable heating setup */
     if (_gasEnabled) {
-        if (data.status & BME680_HEAT_STAB_MSK) {
+        if (this->isGasHeatingSetupStable()) {
             gas_resistance = data.gas_resistance;
             log("Gas Resistance Raw Data %d \r\n", gas_resistance);
         } else {
