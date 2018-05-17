@@ -1,18 +1,32 @@
 #include "mbed_bme680.h"
+#include "mbed_assert.h"
+#include "mbed_wait_api.h"
+#include <cmath>
 
-BME680::BME680() {
-    BME680(BME680_DEFAULT_ADDRESS);
+mbed::I2C* usedI2c = nullptr;
+
+BME680::BME680(mbed::I2C& i2c, uint8_t addr) 
+    : _filterEnabled(false),
+      _tempEnabled(false),
+      _humEnabled(false),
+      _presEnabled(false),
+      _gasEnabled(false),
+      _i2c(i2c),
+      _addr(addr)
+{
+    MBED_ASSERT(nullptr == usedI2c);
+    usedI2c = &_i2c;
 }
 
-BME680::BME680(uint8_t adr) {
-    _filterEnabled = _tempEnabled = _humEnabled = _presEnabled = _gasEnabled = false;
-    _adr = adr;
+BME680::~BME680()
+{
+    usedI2c = nullptr;
 }
 
 bool BME680::begin() {
     int8_t result;
 
-    gas_sensor.dev_id = _adr;
+    gas_sensor.dev_id = _addr;
     gas_sensor.intf = BME680_I2C_INTF;
     gas_sensor.read = &BME680::i2c_read;
     gas_sensor.write = &BME680::i2c_write;
@@ -290,10 +304,10 @@ int8_t BME680::i2c_read(uint8_t dev_id, uint8_t reg_addr, uint8_t *reg_data, uin
 
     log("[0x%X] I2C $%X => ", dev_id >> 1, data[0]);
 
-    result = i2c.write(dev_id, data, 1);
+    result = usedI2c->write(dev_id, data, 1);
     log("[W: %d] ", result);
 
-    result = i2c.read(dev_id, (char *) reg_data, len);
+    result = usedI2c->read(dev_id, (char *) reg_data, len);
 
     for (uint8_t i = 0; i < len; i++) log("0x%X ", reg_data[i]);
 
@@ -322,7 +336,7 @@ int8_t BME680::i2c_write(uint8_t dev_id, uint8_t reg_addr, uint8_t *reg_data, ui
 
     log("[0x%X] I2C $%X <= ", dev_id >> 1, data[0]);
 
-    result = i2c.write(dev_id, data, len + 1);
+    result = usedI2c->write(dev_id, data, len + 1);
 
     for (uint8_t i = 1; i < len + 1; i++) log("0x%X ", data[i]);
 
