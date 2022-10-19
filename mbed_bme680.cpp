@@ -333,7 +333,7 @@ int8_t BME680::i2c_write(uint8_t dev_id, uint8_t reg_addr, uint8_t *reg_data, ui
 
 void BME680::delay_msec(uint32_t ms) {
     log(" * wait %d ms ... \r\n", ms);
-    wait_ms(ms);
+    ThisThread::sleep_for(std::chrono::milliseconds(ms));
 }
 
 void BME680::log(const char *format, ...) {
