@@ -1,10 +1,11 @@
 #include "mbed_bme680.h"
 
-BME680::BME680() {
-    BME680(BME680_DEFAULT_ADDRESS);
+BME680::BME680(PinName sda, PinName scl) {
+    BME680(BME680_DEFAULT_ADDRESS, sda, scl);
 }
 
-BME680::BME680(uint8_t adr) {
+BME680::BME680(uint8_t adr, PinName sda, PinName scl) {
+    i2c(sda, scl);
     _filterEnabled = _tempEnabled = _humEnabled = _presEnabled = _gasEnabled = false;
     _adr = adr;
 }
