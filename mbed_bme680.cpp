@@ -1,10 +1,11 @@
 #include "mbed_bme680.h"
 
-BME680::BME680() {
-    BME680(BME680_DEFAULT_ADDRESS);
+BME680::BME680(PinName sda, PinName scl) {
+    BME680(BME680_DEFAULT_ADDRESS, sda, scl);
 }
 
-BME680::BME680(uint8_t adr) {
+BME680::BME680(uint8_t adr, PinName sda, PinName scl) {
+    i2c(sda, scl);
     _filterEnabled = _tempEnabled = _humEnabled = _presEnabled = _gasEnabled = false;
     _adr = adr;
 }
@@ -333,7 +334,7 @@ int8_t BME680::i2c_write(uint8_t dev_id, uint8_t reg_addr, uint8_t *reg_data, ui
 
 void BME680::delay_msec(uint32_t ms) {
     log(" * wait %d ms ... \r\n", ms);
-    wait_ms(ms);
+    ThisThread::sleep_for(std::chrono::milliseconds(ms));
 }
 
 void BME680::log(const char *format, ...) {

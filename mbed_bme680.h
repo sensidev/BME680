@@ -7,7 +7,6 @@
 #define BME680_DEFAULT_ADDRESS (0x77 << 1)  // The default I2C address (shifted for MBed 8 bit address)
 //#define BME680_DEBUG_MODE  // Use this for enhance debug logs for I2C and more.
 
-extern I2C i2c;
 
 /**
  * BME680 Class for I2C usage.
@@ -15,9 +14,9 @@ extern I2C i2c;
  */
 class BME680 {
 public:
-    BME680();
+    BME680(PinName sda, PinName scl);
 
-    BME680(uint8_t adr);
+    BME680(uint8_t adr, PinName sda, PinName scl);
 
     bool begin();
 
@@ -49,6 +48,7 @@ public:
     float getGasResistance();
 
 private:
+    I2C i2c;
     bool _filterEnabled, _tempEnabled, _humEnabled, _presEnabled, _gasEnabled;
     int32_t _sensorID;
     struct bme680_dev gas_sensor;
